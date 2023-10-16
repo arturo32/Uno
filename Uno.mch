@@ -1,11 +1,16 @@
 MACHINE Uno
 
+SETS
+    ESTADO_JOGO = {INICIO, MEIO, FIM}
 
 CONSTANTS
     NUMERO,
     COMPRAR_DUAS,
     PULAR,
-    INVERTER
+    INVERTER,
+    MUDAR_COR,
+    COMPRAR_QUATRO,
+    NUMERO_JOGADORES
 
 PROPERTIES
     NUMERO = 0..9 &
@@ -13,7 +18,8 @@ PROPERTIES
     PULAR = {11} &
     INVERTER = {12} &
     MUDAR_COR = 13..16 &
-    COMPRAR_QUATRO = 17..20
+    COMPRAR_QUATRO = 17..20 &
+    NUMERO_JOGADORES = 3
     
     
     
@@ -24,8 +30,9 @@ VARIABLES
 	CARTAS_AZUIS, CARTAS_VERMELHAS, CARTAS_VERDES, // cartas numéricas, comprar duas, pular e inverter
 	CARTAS_MUDAR_COR, // cartas coringas que mudam a cor
 	CARTAS_COMPRAR_QUATRO, // cartas coringas comprar 4
-	jogador_atual, carta_atual,
+	jogador_atual, carta_atual, estado_atual,
 	JOGADORES
+   
 	
 
 INVARIANT
@@ -37,9 +44,11 @@ INVARIANT
     CARTAS_COMPRAR_QUATRO <: NAT &
     MESA <: NAT &
     MONTE <: NAT &
-    JOGADORES : iseq(NAT) &
+    JOGADORES : iseq(POW(NAT)) &
+    card(JOGADORES) = NUMERO_JOGADORES &
     jogador_atual : JOGADORES &
     carta_atual : NAT &
+    estado_atual : ESTADO_JOGO &
     size(JOGADORES) >= 2 &
     size(JOGADORES) <= 10
 
@@ -54,17 +63,43 @@ INITIALISATION
 	CARTAS_COMPRAR_QUATRO := 17..20 ||
 	MESA := {} ||
 	MONTE := CARTAS_AZUIS \/ CARTAS_VERMELHAS \/ CARTAS_VERDES \/ CARTAS_AMARELAS \/ CARTAS_MUDAR_COR  \/ CARTAS_COMPRAR_QUATRO ||
-   JOGADORES := [0, 1, 2] ||
-   jogador_atual::{} ||
+   JOGADORES::{} ||
+   jogador_atual::JOGADORES ||
+   estado_atual := INICIO ||
    carta_atual::{}
 	
 
 	
 OPERATIONS 
-    aaa(aa) =
-        PRE aa : NAT
-        THEN MESA := MESA \/ {aa}
+    distribuirCartas(jogador, indice_jogador, cartas) =
+        PRE estado_atual = INICIO & 
+            indice_jogador : NAT  & indice_jogador <= NUMERO_JOGADORES & 
+            jogador : JOGADORES & {indice_jogador} <| JOGADORES = {jogador} &
+            JOGADORES(indice_jogador) = {} &
+            cartas <: MONTE & card(cartas) = 7
+        THEN 
+            jogador := indice_jogador |-> cartas ||
+            MONTE := MONTE - cartas
+        END;
+        
+    comecarJogo =
+        PRE estado_atual = INICIO & {} /: ran(JOGADORES)
+        THEN 
+            estado_atual := MEIO
+        END;
+
+    jogarNumero(jogador, indice_jogador, carta) = 
+        PRE estado_atual = MEIO & 
+            jogador = jogador_atual & carta : NAT & {carta} : ran({jogador}) &
+            indice_jogador : NAT & indice_jogador <= NUMERO_JOGADORES
+        THEN 
+            carta_atual := carta ||
+            MONTE := MONTE - {carta} ||
+            MESA := MESA \/ {carta} ||
+            jogador_atual:(jogador_atual : JOGADORES & {(indice_jogador+1) mod NUMERO_JOGADORES} <| JOGADORES = {jogador})
         END
+        
+        
         
 	
 END
