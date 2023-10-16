@@ -1,7 +1,7 @@
 MACHINE Uno
 
 SETS
-    ESTADO_JOGO = {INICIO, MEIO, FIM}
+    ESTADO_JOGO = {INICIO, MEIO, COMPRAR, FIM}
 
 CONSTANTS
     NUMERO,
@@ -10,7 +10,8 @@ CONSTANTS
     INVERTER,
     MUDAR_COR,
     COMPRAR_QUATRO,
-    NUMERO_JOGADORES
+    NUMERO_JOGADORES,
+    NM
 
 PROPERTIES
     NUMERO = 0..9 &
@@ -19,7 +20,8 @@ PROPERTIES
     INVERTER = {12} &
     MUDAR_COR = 13..16 &
     COMPRAR_QUATRO = 17..20 &
-    NUMERO_JOGADORES = 3
+    NUMERO_JOGADORES = 3 &
+    NM = 21 // número mágico: para ser usado em relações de congruência
     
     
     
@@ -31,7 +33,8 @@ VARIABLES
 	CARTAS_MUDAR_COR, // cartas coringas que mudam a cor
 	CARTAS_COMPRAR_QUATRO, // cartas coringas comprar 4
 	jogador_atual, carta_atual, estado_atual,
-	JOGADORES
+	JOGADORES,
+	acumulo_comprar // número de cartas que devem ser compradas pelo jogador atual
    
 	
 
@@ -50,7 +53,8 @@ INVARIANT
     carta_atual : NAT &
     estado_atual : ESTADO_JOGO &
     size(JOGADORES) >= 2 &
-    size(JOGADORES) <= 10
+    size(JOGADORES) <= 10 &
+    acumulo_comprar : NAT
 
     
     
@@ -66,7 +70,8 @@ INITIALISATION
    JOGADORES::{} ||
    jogador_atual::JOGADORES ||
    estado_atual := INICIO ||
-   carta_atual::{}
+   carta_atual::{} ||
+   acumulo_comprar := 0
 	
 
 	
@@ -78,7 +83,7 @@ OPERATIONS
             JOGADORES(indice_jogador) = {} &
             cartas <: MONTE & card(cartas) = 7
         THEN 
-            jogador := indice_jogador |-> cartas ||
+            JOGADORES := JOGADORES <+ {indice_jogador |-> cartas} ||
             MONTE := MONTE - cartas
         END;
         
@@ -90,14 +95,38 @@ OPERATIONS
 
     jogarNumero(jogador, indice_jogador, carta) = 
         PRE estado_atual = MEIO & 
-            jogador = jogador_atual & carta : NAT & {carta} : ran({jogador}) &
-            indice_jogador : NAT & indice_jogador <= NUMERO_JOGADORES
+            jogador = jogador_atual & 
+            carta : NAT & {carta} : ran({jogador}) & // jogador possui carta
+            carta_atual mod NM : NUMERO & carta mod NM : NUMERO & // cartas são números
+            (carta mod NM = carta_atual mod NM or 
+                {carta, carta_atual} <: CARTAS_VERMELHAS or {carta, carta_atual} <: CARTAS_VERDES or 
+                {carta, carta_atual} <: CARTAS_AMARELAS) & // cartas são iguais ou possuem mesma cor
+            indice_jogador : NAT & indice_jogador <= NUMERO_JOGADORES & 
+            {indice_jogador} <| JOGADORES = {jogador} // índice correponde a jogador
         THEN 
             carta_atual := carta ||
             MONTE := MONTE - {carta} ||
             MESA := MESA \/ {carta} ||
             jogador_atual:(jogador_atual : JOGADORES & {(indice_jogador+1) mod NUMERO_JOGADORES} <| JOGADORES = {jogador})
-        END
+        END;
+        
+    jogarInverter(jogador, indice_jogador, carta) = 
+        PRE estado_atual = MEIO & 
+            jogador = jogador_atual & 
+            carta : NAT & {carta} : ran({jogador}) & // jogador possui carta
+            carta mod NM : INVERTER & // carta é de inverter
+            (carta mod NM = carta_atual mod NM or 
+                {carta, carta_atual} <: CARTAS_VERMELHAS or {carta, carta_atual} <: CARTAS_VERDES or 
+                {carta, carta_atual} <: CARTAS_AMARELAS) & // cartas são iguais ou possuem mesma cor
+            indice_jogador : NAT & indice_jogador <= NUMERO_JOGADORES & 
+            {indice_jogador} <| JOGADORES = {jogador} // índice correponde a jogador
+        THEN 
+            carta_atual := carta ||
+            MONTE := MONTE - {carta} ||
+            MESA := MESA \/ {carta} ||
+            JOGADORES := rev(JOGADORES) || // inverte sequência de jogadores
+            jogador_atual:(jogador_atual : JOGADORES & {(indice_jogador+1) mod NUMERO_JOGADORES} <| JOGADORES = {jogador})
+        END;    
         
         
         
