@@ -165,7 +165,6 @@ OPERATIONS
         END;            
         
 	
-	    
     jogarMudarCor(jogador, indice_jogador, carta) = 
         PRE (estado_atual = MEIO) &
             jogador = jogador_atual & 
@@ -177,9 +176,29 @@ OPERATIONS
             carta_atual := carta ||
             MONTE := MONTE - {carta} ||
             MESA := MESA \/ {carta} ||
-            CHOICE CARTAS_AZUIS := CARTAS_AZUIS \/ {carta} OR CARTAS_VERMELHAS := CARTAS_VERMELHAS \/ {carta} OR 
-                CARTAS_VERDES := CARTAS_VERDES \/ {carta} OR CARTAS_AMARELAS := CARTAS_AMARELAS \/ {carta}
-            END || //ds
+            CHOICE CARTAS_AZUIS := CARTAS_AZUIS \/ {carta_atual} OR CARTAS_VERMELHAS := CARTAS_VERMELHAS \/ {carta_atual} OR 
+                CARTAS_VERDES := CARTAS_VERDES \/ {carta_atual} OR CARTAS_AMARELAS := CARTAS_AMARELAS \/ {carta_atual}
+            END || // Define uma cor para carta atual
             jogador_atual:(jogador_atual : JOGADORES & {(indice_jogador+1) mod NUMERO_JOGADORES} <| JOGADORES = {jogador})
-        END;	    
+        END;	
+        
+        
+    jogarComprarQuatro(jogador, indice_jogador, carta) = 
+        PRE (estado_atual = MEIO or estado_atual = COMPRAR) & // pode executar se alguma carta de comprar foi jogada
+            jogador = jogador_atual & 
+            carta : NAT & {carta} : ran({jogador}) & // jogador possui carta
+            carta mod NM : COMPRAR_QUATRO & // carta é coringa comprar 4
+            indice_jogador : NAT & indice_jogador <= NUMERO_JOGADORES & 
+            {indice_jogador} <| JOGADORES = {jogador} // índice correponde a jogador
+        THEN 
+            carta_atual := carta ||
+            MONTE := MONTE - {carta} ||
+            MESA := MESA \/ {carta} ||
+            CHOICE CARTAS_AZUIS := CARTAS_AZUIS \/ {carta_atual} OR CARTAS_VERMELHAS := CARTAS_VERMELHAS \/ {carta_atual} OR 
+                CARTAS_VERDES := CARTAS_VERDES \/ {carta_atual} OR CARTAS_AMARELAS := CARTAS_AMARELAS \/ {carta_atual}
+            END || // Define uma cor para carta atual
+            jogador_atual:(jogador_atual : JOGADORES & {(indice_jogador+1) mod NUMERO_JOGADORES} <| JOGADORES = {jogador}) ||
+            estado_atual := COMPRAR || // muda ou mantém o estado em COMPRAR
+            acumulo_comprar := acumulo_comprar + 4 // aumenta o acumulo de compra em 4
+        END;  
 END
