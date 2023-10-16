@@ -105,7 +105,7 @@ OPERATIONS
             {indice_jogador} <| JOGADORES = {jogador} // índice correponde a jogador
         THEN 
             carta_atual := carta ||
-            MONTE := MONTE - {carta} ||
+            JOGADORES := JOGADORES <+ {indice_jogador |-> JOGADORES(indice_jogador) - {carta}} || // remove carta da mão do jogador
             MESA := MESA \/ {carta} ||
             jogador_atual:(jogador_atual : JOGADORES & {(indice_jogador+1) mod NUMERO_JOGADORES} <| JOGADORES = {jogador})
         END;
@@ -124,7 +124,7 @@ OPERATIONS
             carta_atual := carta ||
             MONTE := MONTE - {carta} ||
             MESA := MESA \/ {carta} ||
-            JOGADORES := rev(JOGADORES) || // inverte sequência de jogadores
+            JOGADORES := rev(JOGADORES <+ {indice_jogador |-> JOGADORES(indice_jogador) - {carta}}) || // remove carta da mão do jogador e inverte sequência de jogadores
             jogador_atual:(jogador_atual : JOGADORES & {(indice_jogador+1) mod NUMERO_JOGADORES} <| JOGADORES = {jogador})
         END;    
         
@@ -140,7 +140,7 @@ OPERATIONS
             {indice_jogador} <| JOGADORES = {jogador} // índice correponde a jogador
         THEN 
             carta_atual := carta ||
-            MONTE := MONTE - {carta} ||
+            JOGADORES := JOGADORES <+ {indice_jogador |-> JOGADORES(indice_jogador) - {carta}} || // remove carta da mão do jogador
             MESA := MESA \/ {carta} ||
             jogador_atual:(jogador_atual : JOGADORES & {(indice_jogador+2) mod NUMERO_JOGADORES} <| JOGADORES = {jogador}) // aumenta índice em duas unidades
         END;    
@@ -157,7 +157,7 @@ OPERATIONS
             {indice_jogador} <| JOGADORES = {jogador} // índice correponde a jogador
         THEN 
             carta_atual := carta ||
-            MONTE := MONTE - {carta} ||
+            JOGADORES := JOGADORES <+ {indice_jogador |-> JOGADORES(indice_jogador) - {carta}} || // remove carta da mão do jogador
             MESA := MESA \/ {carta} ||
             jogador_atual:(jogador_atual : JOGADORES & {(indice_jogador+1) mod NUMERO_JOGADORES} <| JOGADORES = {jogador}) ||
             estado_atual := COMPRAR || // muda ou mantém o estado em COMPRAR
@@ -174,7 +174,7 @@ OPERATIONS
             {indice_jogador} <| JOGADORES = {jogador} // índice correponde a jogador
         THEN 
             carta_atual := carta ||
-            MONTE := MONTE - {carta} ||
+            JOGADORES := JOGADORES <+ {indice_jogador |-> JOGADORES(indice_jogador) - {carta}} || // remove carta da mão do jogador
             MESA := MESA \/ {carta} ||
             CHOICE CARTAS_AZUIS := CARTAS_AZUIS \/ {carta_atual} OR CARTAS_VERMELHAS := CARTAS_VERMELHAS \/ {carta_atual} OR 
                 CARTAS_VERDES := CARTAS_VERDES \/ {carta_atual} OR CARTAS_AMARELAS := CARTAS_AMARELAS \/ {carta_atual}
@@ -192,13 +192,28 @@ OPERATIONS
             {indice_jogador} <| JOGADORES = {jogador} // índice correponde a jogador
         THEN 
             carta_atual := carta ||
-            MONTE := MONTE - {carta} ||
+            JOGADORES := JOGADORES <+ {indice_jogador |-> JOGADORES(indice_jogador) - {carta}} || // remove carta da mão do jogador
             MESA := MESA \/ {carta} ||
-            CHOICE CARTAS_AZUIS := CARTAS_AZUIS \/ {carta_atual} OR CARTAS_VERMELHAS := CARTAS_VERMELHAS \/ {carta_atual} OR 
-                CARTAS_VERDES := CARTAS_VERDES \/ {carta_atual} OR CARTAS_AMARELAS := CARTAS_AMARELAS \/ {carta_atual}
+            CHOICE CARTAS_AZUIS := CARTAS_AZUIS \/ {carta} OR CARTAS_VERMELHAS := CARTAS_VERMELHAS \/ {carta} OR 
+                CARTAS_VERDES := CARTAS_VERDES \/ {carta} OR CARTAS_AMARELAS := CARTAS_AMARELAS \/ {carta}
             END || // Define uma cor para carta atual
             jogador_atual:(jogador_atual : JOGADORES & {(indice_jogador+1) mod NUMERO_JOGADORES} <| JOGADORES = {jogador}) ||
             estado_atual := COMPRAR || // muda ou mantém o estado em COMPRAR
             acumulo_comprar := acumulo_comprar + 4 // aumenta o acumulo de compra em 4
         END;  
+        
+    comprarCartas(jogador, indice_jogador, cartas) = 
+        PRE (estado_atual = COMPRAR) & // só pode executar caso o estado seja COMPRAR
+            jogador = jogador_atual & 
+            indice_jogador : NAT & indice_jogador <= NUMERO_JOGADORES & 
+            {indice_jogador} <| JOGADORES = {jogador} & // índice correponde a jogador
+            cartas <: MONTE & card(cartas) = acumulo_comprar // a quantidade de cartas a serem compradas é igual ao acúmulo
+            
+            
+        THEN 
+            MONTE := MONTE - cartas ||
+            jogador_atual:(jogador_atual : JOGADORES & {(indice_jogador+1) mod NUMERO_JOGADORES} <| JOGADORES = {jogador}) ||
+            estado_atual := COMPRAR || // muda ou mantém o estado em COMPRAR
+            acumulo_comprar := acumulo_comprar + 4 // aumenta o acumulo de compra em 4
+        END;    
 END
