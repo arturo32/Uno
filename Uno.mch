@@ -208,12 +208,27 @@ OPERATIONS
             indice_jogador : NAT & indice_jogador <= NUMERO_JOGADORES & 
             {indice_jogador} <| JOGADORES = {jogador} & // índice correponde a jogador
             cartas <: MONTE & card(cartas) = acumulo_comprar // a quantidade de cartas a serem compradas é igual ao acúmulo
-            
-            
         THEN 
             MONTE := MONTE - cartas ||
+            JOGADORES := JOGADORES <+ {indice_jogador |-> (JOGADORES(indice_jogador) \/ cartas)} || // adiciona cartas a mão do jogador
             jogador_atual:(jogador_atual : JOGADORES & {(indice_jogador+1) mod NUMERO_JOGADORES} <| JOGADORES = {jogador}) ||
-            estado_atual := COMPRAR || // muda ou mantém o estado em COMPRAR
-            acumulo_comprar := acumulo_comprar + 4 // aumenta o acumulo de compra em 4
+            estado_atual := MEIO || // muda o estado atual para MEIO
+            acumulo_comprar := 0
         END;    
+        
+        
+    puxarCarta(jogador, indice_jogador, carta) = 
+        PRE (estado_atual = MEIO) & 
+            jogador = jogador_atual & 
+            indice_jogador : NAT & indice_jogador <= NUMERO_JOGADORES & 
+            {indice_jogador} <| JOGADORES = {jogador} & // índice correponde a jogador
+            carta : MONTE &
+            !ca.(ca : JOGADORES(indice_jogador) => {ca, carta_atual} /<: CARTAS_AZUIS & 
+                {ca, carta_atual} /<: CARTAS_VERMELHAS & {ca, carta_atual} /<: CARTAS_VERDES & 
+                {ca, carta_atual} /<: CARTAS_AMARELAS & ca /: (MUDAR_COR \/ COMPRAR_QUATRO)) // jogador não possui nenhuma carta que combine com a atual nem possui nenhum coringa
+        THEN 
+            MONTE := MONTE - {carta} ||
+            JOGADORES := JOGADORES <+ {indice_jogador |-> (JOGADORES(indice_jogador) \/ {carta})} || // adiciona carta a mão do jogador
+            jogador_atual:(jogador_atual : JOGADORES & {(indice_jogador+1) mod NUMERO_JOGADORES} <| JOGADORES = {jogador})
+        END;       
 END
