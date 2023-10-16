@@ -133,41 +133,35 @@ OPERATIONS
             END 
         END;    
         
-     jogarPular(jogador, indice_jogador, carta) = 
+     jogarPular(carta) = 
         PRE estado_atual = MEIO & 
-            jogador = jogador_atual & 
-            carta : NAT & carta : jogador & // jogador possui carta
+            carta : NAT & carta : jogador_atual & // jogador possui carta
             carta mod NM : PULAR & // carta é de pular
             (carta mod NM = carta_atual mod NM or 
                {carta, carta_atual} <: CARTAS_AZUIS or {carta, carta_atual} <: CARTAS_VERMELHAS or 
-               {carta, carta_atual} <: CARTAS_VERDES or {carta, carta_atual} <: CARTAS_AMARELAS) & // cartas são iguais ou possuem mesma cor
-            indice_jogador : dom(JOGADORES) &
-            JOGADORES(indice_jogador) = jogador // índice correponde a jogador
+               {carta, carta_atual} <: CARTAS_VERDES or {carta, carta_atual} <: CARTAS_AMARELAS) // cartas são iguais ou possuem mesma cor
         THEN 
             carta_atual := carta ||
-            LET NOVO_JOGADORES BE  NOVO_JOGADORES = JOGADORES <+ {indice_jogador |-> JOGADORES(indice_jogador) - {carta}} IN 
+            LET NOVO_JOGADORES BE  NOVO_JOGADORES = JOGADORES <+ {JOGADORES~(jogador_atual) |-> jogador_atual - {carta}} IN 
                 JOGADORES := NOVO_JOGADORES || // remove carta da mão do jogador
-                jogador_atual := NOVO_JOGADORES((indice_jogador+2) mod NUMERO_JOGADORES) // aumenta índice em duas unidades
+                jogador_atual := NOVO_JOGADORES((JOGADORES~(jogador_atual)+2) mod NUMERO_JOGADORES) // aumenta índice em duas unidades
             END ||
             MESA := MESA \/ {carta} 
         END;    
         
-    jogarComprarDuas(jogador, indice_jogador, carta) = 
+    jogarComprarDuas(carta) = 
         PRE (estado_atual = MEIO or estado_atual = COMPRAR) & // pode executar se alguma carta de comprar foi jogada
-            jogador = jogador_atual & 
-            carta : NAT & carta : jogador & // jogador possui carta
+            carta : NAT & carta : jogador_atual & // jogador possui carta
             carta mod NM : COMPRAR_DUAS & // carta é de comprar duas
             (carta mod NM = carta_atual mod NM or 
                {carta, carta_atual} <: CARTAS_AZUIS or {carta, carta_atual} <: CARTAS_VERMELHAS or 
                {carta, carta_atual} <: CARTAS_VERDES or {carta, carta_atual} <: CARTAS_AMARELAS) & // cartas são iguais ou possuem mesma cor
-            indice_jogador : dom(JOGADORES) & 
-            JOGADORES(indice_jogador) = jogador & // índice correponde a jogador
             acumulo_comprar + 2 : NAT
         THEN 
             carta_atual := carta ||
-            LET NOVO_JOGADORES BE  NOVO_JOGADORES = JOGADORES <+ {indice_jogador |-> JOGADORES(indice_jogador) - {carta}} IN 
+            LET NOVO_JOGADORES BE  NOVO_JOGADORES = JOGADORES <+ {JOGADORES~(jogador_atual) |-> jogador_atual - {carta}} IN 
                 JOGADORES := NOVO_JOGADORES || // remove carta da mão do jogador
-                jogador_atual := NOVO_JOGADORES((indice_jogador+1) mod NUMERO_JOGADORES)
+                jogador_atual := NOVO_JOGADORES((JOGADORES~(jogador_atual)+1) mod NUMERO_JOGADORES)
             END ||            
             MESA := MESA \/ {carta} ||
             estado_atual := COMPRAR || // muda ou mantém o estado em COMPRAR
@@ -175,18 +169,15 @@ OPERATIONS
         END;            
         
 	
-    jogarMudarCor(jogador, indice_jogador, carta) = 
+    jogarMudarCor(carta) = 
         PRE (estado_atual = MEIO) &
-            jogador = jogador_atual & 
-            carta : NAT & carta : jogador & // jogador possui carta
-            carta mod NM : MUDAR_COR & // carta é coringa que muda cor
-            indice_jogador : dom(JOGADORES) &
-            JOGADORES(indice_jogador) = jogador // índice correponde a jogador
+            carta : NAT & carta : jogador_atual & // jogador possui carta
+            carta mod NM : MUDAR_COR // carta é coringa que muda cor
         THEN 
             carta_atual := carta ||
-            LET NOVO_JOGADORES BE  NOVO_JOGADORES = JOGADORES <+ {indice_jogador |-> JOGADORES(indice_jogador) - {carta}} IN 
+            LET NOVO_JOGADORES BE  NOVO_JOGADORES = JOGADORES <+ {JOGADORES~(jogador_atual) |-> jogador_atual - {carta}} IN 
                 JOGADORES := NOVO_JOGADORES || // remove carta da mão do jogador
-                jogador_atual := NOVO_JOGADORES((indice_jogador+1) mod NUMERO_JOGADORES)
+                jogador_atual := NOVO_JOGADORES((JOGADORES~(jogador_atual)+1) mod NUMERO_JOGADORES)
             END ||
             MESA := MESA \/ {carta} ||
             CHOICE CARTAS_AZUIS := CARTAS_AZUIS \/ {carta_atual} OR CARTAS_VERMELHAS := CARTAS_VERMELHAS \/ {carta_atual} OR 
@@ -196,19 +187,16 @@ OPERATIONS
         END;	
         
         
-    jogarComprarQuatro(jogador, indice_jogador, carta) = 
+    jogarComprarQuatro(carta) = 
         PRE (estado_atual = MEIO or estado_atual = COMPRAR) & // pode executar se alguma carta de comprar foi jogada
-            jogador = jogador_atual & 
-            carta : NAT & carta : jogador & // jogador possui carta
+            carta : NAT & carta : jogador_atual & // jogador possui carta
             carta mod NM : COMPRAR_QUATRO & // carta é coringa comprar 4
-            indice_jogador : dom(JOGADORES) &
-            JOGADORES(indice_jogador) = jogador & // índice correponde a jogador
             acumulo_comprar + 4 : NAT
         THEN 
             carta_atual := carta ||
-            LET NOVO_JOGADORES BE  NOVO_JOGADORES = JOGADORES <+ {indice_jogador |-> JOGADORES(indice_jogador) - {carta}} IN 
+            LET NOVO_JOGADORES BE  NOVO_JOGADORES = JOGADORES <+ {JOGADORES~(jogador_atual) |-> jogador_atual - {carta}} IN 
                 JOGADORES := NOVO_JOGADORES || // remove carta da mão do jogador
-                jogador_atual := NOVO_JOGADORES((indice_jogador+1) mod NUMERO_JOGADORES)
+                jogador_atual := NOVO_JOGADORES((JOGADORES~(jogador_atual)+1) mod NUMERO_JOGADORES)
             END ||
             MESA := MESA \/ {carta} ||
             CHOICE CARTAS_AZUIS := CARTAS_AZUIS \/ {carta} OR CARTAS_VERMELHAS := CARTAS_VERMELHAS \/ {carta} OR 
@@ -218,38 +206,32 @@ OPERATIONS
             acumulo_comprar := acumulo_comprar + 4 // aumenta o acumulo de compra em 4
         END;  
         
-    comprarCartas(jogador, indice_jogador, cartas) = 
+    comprarCartas(cartas) = 
         PRE (estado_atual = COMPRAR) & // só pode executar caso o estado seja COMPRAR
-            jogador = jogador_atual & 
-            indice_jogador : dom(JOGADORES) & 
-            JOGADORES(indice_jogador) = jogador & // índice correponde a jogador
             cartas <: MONTE & card(cartas) = acumulo_comprar // a quantidade de cartas a serem compradas é igual ao acúmulo
         THEN 
             MONTE := MONTE - cartas ||
-            LET NOVO_JOGADORES BE  NOVO_JOGADORES = JOGADORES <+ {indice_jogador |-> (JOGADORES(indice_jogador) \/ cartas)} IN 
+            LET NOVO_JOGADORES BE  NOVO_JOGADORES = JOGADORES <+ {JOGADORES~(jogador_atual) |-> (jogador_atual \/ cartas)} IN 
                 JOGADORES := NOVO_JOGADORES ||  // adiciona cartas a mão do jogador
-                jogador_atual := NOVO_JOGADORES((indice_jogador+1) mod NUMERO_JOGADORES)
+                jogador_atual := NOVO_JOGADORES((JOGADORES~(jogador_atual)+1) mod NUMERO_JOGADORES)
             END ||
             estado_atual := MEIO || // muda o estado atual para MEIO
             acumulo_comprar := 0
         END;    
         
         
-    puxarCarta(jogador, indice_jogador, carta) = 
+    puxarCarta(carta) = 
         PRE (estado_atual = MEIO) & 
-            jogador = jogador_atual & 
-            indice_jogador : dom(JOGADORES) &
-            JOGADORES(indice_jogador) = jogador & // índice correponde a jogador
             carta : MONTE &
-            !ca.(ca : JOGADORES(indice_jogador) => {ca, carta_atual} /<: CARTAS_AZUIS & 
+            !ca.(ca : jogador_atual => {ca, carta_atual} /<: CARTAS_AZUIS & 
                 {ca, carta_atual} /<: CARTAS_VERMELHAS & {ca, carta_atual} /<: CARTAS_VERDES & 
                 {ca, carta_atual} /<: CARTAS_AMARELAS & ca /: (MUDAR_COR \/ COMPRAR_QUATRO)) & // jogador não possui nenhuma carta que combine com a atual nem possui nenhum coringa
-            ((indice_jogador+1) mod NUMERO_JOGADORES) : dom(JOGADORES)
+            ((JOGADORES~(jogador_atual)+1) mod NUMERO_JOGADORES) : dom(JOGADORES)
         THEN 
             MONTE := MONTE - {carta} ||
-             LET NOVO_JOGADORES BE  NOVO_JOGADORES = JOGADORES <+ {indice_jogador |-> (JOGADORES(indice_jogador) \/ {carta})} IN 
+             LET NOVO_JOGADORES BE  NOVO_JOGADORES = JOGADORES <+ {JOGADORES~(jogador_atual) |-> (jogador_atual \/ {carta})} IN 
                 JOGADORES := NOVO_JOGADORES ||  // adiciona carta a mão do jogador
-                jogador_atual := NOVO_JOGADORES((indice_jogador+1) mod NUMERO_JOGADORES)
+                jogador_atual := NOVO_JOGADORES((JOGADORES~(jogador_atual)+1) mod NUMERO_JOGADORES)
             END
         END;   
         
