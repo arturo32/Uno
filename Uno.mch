@@ -128,7 +128,43 @@ OPERATIONS
             jogador_atual:(jogador_atual : JOGADORES & {(indice_jogador+1) mod NUMERO_JOGADORES} <| JOGADORES = {jogador})
         END;    
         
+     jogarPular(jogador, indice_jogador, carta) = 
+        PRE estado_atual = MEIO & 
+            jogador = jogador_atual & 
+            carta : NAT & {carta} : ran({jogador}) & // jogador possui carta
+            carta mod NM : PULAR & // carta é de pular
+            (carta mod NM = carta_atual mod NM or 
+                {carta, carta_atual} <: CARTAS_VERMELHAS or {carta, carta_atual} <: CARTAS_VERDES or 
+                {carta, carta_atual} <: CARTAS_AMARELAS) & // cartas são iguais ou possuem mesma cor
+            indice_jogador : NAT & indice_jogador <= NUMERO_JOGADORES & 
+            {indice_jogador} <| JOGADORES = {jogador} // índice correponde a jogador
+        THEN 
+            carta_atual := carta ||
+            MONTE := MONTE - {carta} ||
+            MESA := MESA \/ {carta} ||
+            JOGADORES := JOGADORES || 
+            jogador_atual:(jogador_atual : JOGADORES & {(indice_jogador+2) mod NUMERO_JOGADORES} <| JOGADORES = {jogador}) // aumenta índice em duas unidades
+        END;    
         
+    jogarComprarDuas(jogador, indice_jogador, carta) = 
+        PRE (estado_atual = MEIO or estado_atual = COMPRAR) & // pode executar se alguma carta de comprar foi jogada
+            jogador = jogador_atual & 
+            carta : NAT & {carta} : ran({jogador}) & // jogador possui carta
+            carta mod NM : COMPRAR_DUAS & // carta é de comprar duas
+            (carta mod NM = carta_atual mod NM or 
+                {carta, carta_atual} <: CARTAS_VERMELHAS or {carta, carta_atual} <: CARTAS_VERDES or 
+                {carta, carta_atual} <: CARTAS_AMARELAS) & // cartas são iguais ou possuem mesma cor
+            indice_jogador : NAT & indice_jogador <= NUMERO_JOGADORES & 
+            {indice_jogador} <| JOGADORES = {jogador} // índice correponde a jogador
+        THEN 
+            carta_atual := carta ||
+            MONTE := MONTE - {carta} ||
+            MESA := MESA \/ {carta} ||
+            JOGADORES := JOGADORES || 
+            jogador_atual:(jogador_atual : JOGADORES & {(indice_jogador+1) mod NUMERO_JOGADORES} <| JOGADORES = {jogador}) ||
+            estado_atual := COMPRAR || // muda ou mantém o estado em COMPRAR
+            acumulo_comprar := acumulo_comprar + 2 // aumenta o acumulo de compra em 2
+        END;            
         
 	
 END
