@@ -1,7 +1,8 @@
 MACHINE Uno
 
 SETS
-    ESTADO_JOGO = {INICIO, MEIO, COMPRAR, FIM}
+    ESTADO_JOGO = {INICIO, MEIO, COMPRAR, FIM};
+    DIZER_UNO = {UNO}
 
 CONSTANTS
     NUMERO,
@@ -21,7 +22,7 @@ PROPERTIES
     MUDAR_COR = 13..16 &
     COMPRAR_QUATRO = 17..20 &
     NUMERO_JOGADORES = 3 &
-    NM = 21 // número mágico: para ser usado em relações de congruência
+    NM = 21 // número mágico: para ser usado em relações de congruência &
     
     
     
@@ -230,5 +231,17 @@ OPERATIONS
             MONTE := MONTE - {carta} ||
             JOGADORES := JOGADORES <+ {indice_jogador |-> (JOGADORES(indice_jogador) \/ {carta})} || // adiciona carta a mão do jogador
             jogador_atual:(jogador_atual : JOGADORES & {(indice_jogador+1) mod NUMERO_JOGADORES} <| JOGADORES = {jogador})
-        END;       
+        END;   
+        
+        
+    un <-- dizerUno(jogador, indice_jogador) = 
+        PRE (estado_atual = MEIO) & 
+            jogador : JOGADORES &
+            indice_jogador : NAT & indice_jogador <= NUMERO_JOGADORES & 
+            {indice_jogador} <| JOGADORES = {jogador} & // índice correponde a jogador
+            card(JOGADORES(indice_jogador)) = 1 & // o jogador possui apenas uma carta
+            un : DIZER_UNO
+        THEN
+            un := UNO
+        END;            
 END
