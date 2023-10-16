@@ -79,7 +79,7 @@ INITIALISATION
 OPERATIONS 
     distribuirCartas(jogador, indice_jogador, cartas) =
         PRE estado_atual = INICIO & 
-            indice_jogador : NAT  & indice_jogador <= NUMERO_JOGADORES & 
+            indice_jogador : dom(JOGADORES) &
             jogador : JOGADORES & {indice_jogador} <| JOGADORES = {jogador} &
             JOGADORES(indice_jogador) = {} &
             cartas <: MONTE & card(cartas) = 7
@@ -102,7 +102,7 @@ OPERATIONS
             (carta mod NM = carta_atual mod NM or 
                {carta, carta_atual} <: CARTAS_AZUIS or {carta, carta_atual} <: CARTAS_VERMELHAS or 
                {carta, carta_atual} <: CARTAS_VERDES or {carta, carta_atual} <: CARTAS_AMARELAS) & // cartas são iguais ou possuem mesma cor
-            indice_jogador : NAT & indice_jogador <= NUMERO_JOGADORES & 
+            indice_jogador : dom(JOGADORES) & 
             {indice_jogador} <| JOGADORES = {jogador} // índice correponde a jogador
         THEN 
             carta_atual := carta ||
@@ -119,7 +119,7 @@ OPERATIONS
             (carta mod NM = carta_atual mod NM or 
                {carta, carta_atual} <: CARTAS_AZUIS or {carta, carta_atual} <: CARTAS_VERMELHAS or 
                {carta, carta_atual} <: CARTAS_VERDES or {carta, carta_atual} <: CARTAS_AMARELAS) & // cartas são iguais ou possuem mesma cor
-            indice_jogador : NAT & indice_jogador <= NUMERO_JOGADORES & 
+            indice_jogador : dom(JOGADORES) & 
             {indice_jogador} <| JOGADORES = {jogador} // índice correponde a jogador
         THEN 
             carta_atual := carta ||
@@ -137,7 +137,7 @@ OPERATIONS
             (carta mod NM = carta_atual mod NM or 
                {carta, carta_atual} <: CARTAS_AZUIS or {carta, carta_atual} <: CARTAS_VERMELHAS or 
                {carta, carta_atual} <: CARTAS_VERDES or {carta, carta_atual} <: CARTAS_AMARELAS) & // cartas são iguais ou possuem mesma cor
-            indice_jogador : NAT & indice_jogador <= NUMERO_JOGADORES & 
+            indice_jogador : dom(JOGADORES) &
             {indice_jogador} <| JOGADORES = {jogador} // índice correponde a jogador
         THEN 
             carta_atual := carta ||
@@ -154,7 +154,7 @@ OPERATIONS
             (carta mod NM = carta_atual mod NM or 
                {carta, carta_atual} <: CARTAS_AZUIS or {carta, carta_atual} <: CARTAS_VERMELHAS or 
                {carta, carta_atual} <: CARTAS_VERDES or {carta, carta_atual} <: CARTAS_AMARELAS) & // cartas são iguais ou possuem mesma cor
-            indice_jogador : NAT & indice_jogador <= NUMERO_JOGADORES & 
+            indice_jogador : dom(JOGADORES) & 
             {indice_jogador} <| JOGADORES = {jogador} // índice correponde a jogador
         THEN 
             carta_atual := carta ||
@@ -171,7 +171,7 @@ OPERATIONS
             jogador = jogador_atual & 
             carta : NAT & {carta} : ran({jogador}) & // jogador possui carta
             carta mod NM : MUDAR_COR & // carta é coringa que muda cor
-            indice_jogador : NAT & indice_jogador <= NUMERO_JOGADORES & 
+            indice_jogador : dom(JOGADORES) &
             {indice_jogador} <| JOGADORES = {jogador} // índice correponde a jogador
         THEN 
             carta_atual := carta ||
@@ -189,7 +189,7 @@ OPERATIONS
             jogador = jogador_atual & 
             carta : NAT & {carta} : ran({jogador}) & // jogador possui carta
             carta mod NM : COMPRAR_QUATRO & // carta é coringa comprar 4
-            indice_jogador : NAT & indice_jogador <= NUMERO_JOGADORES & 
+            indice_jogador : dom(JOGADORES) &
             {indice_jogador} <| JOGADORES = {jogador} // índice correponde a jogador
         THEN 
             carta_atual := carta ||
@@ -206,7 +206,7 @@ OPERATIONS
     comprarCartas(jogador, indice_jogador, cartas) = 
         PRE (estado_atual = COMPRAR) & // só pode executar caso o estado seja COMPRAR
             jogador = jogador_atual & 
-            indice_jogador : NAT & indice_jogador <= NUMERO_JOGADORES & 
+            indice_jogador : dom(JOGADORES) & 
             {indice_jogador} <| JOGADORES = {jogador} & // índice correponde a jogador
             cartas <: MONTE & card(cartas) = acumulo_comprar // a quantidade de cartas a serem compradas é igual ao acúmulo
         THEN 
@@ -221,7 +221,7 @@ OPERATIONS
     puxarCarta(jogador, indice_jogador, carta) = 
         PRE (estado_atual = MEIO) & 
             jogador = jogador_atual & 
-            indice_jogador : NAT & indice_jogador <= NUMERO_JOGADORES & 
+            indice_jogador : dom(JOGADORES) &
             {indice_jogador} <| JOGADORES = {jogador} & // índice correponde a jogador
             carta : MONTE &
             !ca.(ca : JOGADORES(indice_jogador) => {ca, carta_atual} /<: CARTAS_AZUIS & 
@@ -237,11 +237,11 @@ OPERATIONS
     un <-- dizerUno(jogador, indice_jogador) = 
         PRE (estado_atual = MEIO) & 
             jogador : JOGADORES &
-            indice_jogador : NAT & indice_jogador <= NUMERO_JOGADORES & 
+            indice_jogador : dom(JOGADORES) & 
             {indice_jogador} <| JOGADORES = {jogador} & // índice correponde a jogador
             card(JOGADORES(indice_jogador)) = 1 & // o jogador possui apenas uma carta
             un : DIZER_UNO
         THEN
             un := UNO
-        END;            
+        END            
 END
