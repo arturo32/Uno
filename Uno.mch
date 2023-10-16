@@ -99,8 +99,8 @@ OPERATIONS
             carta : NAT & {carta} : ran({jogador}) & // jogador possui carta
             carta_atual mod NM : NUMERO & carta mod NM : NUMERO & // cartas são números
             (carta mod NM = carta_atual mod NM or 
-                {carta, carta_atual} <: CARTAS_VERMELHAS or {carta, carta_atual} <: CARTAS_VERDES or 
-                {carta, carta_atual} <: CARTAS_AMARELAS) & // cartas são iguais ou possuem mesma cor
+               {carta, carta_atual} <: CARTAS_AZUIS or {carta, carta_atual} <: CARTAS_VERMELHAS or 
+               {carta, carta_atual} <: CARTAS_VERDES or {carta, carta_atual} <: CARTAS_AMARELAS) & // cartas são iguais ou possuem mesma cor
             indice_jogador : NAT & indice_jogador <= NUMERO_JOGADORES & 
             {indice_jogador} <| JOGADORES = {jogador} // índice correponde a jogador
         THEN 
@@ -116,8 +116,8 @@ OPERATIONS
             carta : NAT & {carta} : ran({jogador}) & // jogador possui carta
             carta mod NM : INVERTER & // carta é de inverter
             (carta mod NM = carta_atual mod NM or 
-                {carta, carta_atual} <: CARTAS_VERMELHAS or {carta, carta_atual} <: CARTAS_VERDES or 
-                {carta, carta_atual} <: CARTAS_AMARELAS) & // cartas são iguais ou possuem mesma cor
+               {carta, carta_atual} <: CARTAS_AZUIS or {carta, carta_atual} <: CARTAS_VERMELHAS or 
+               {carta, carta_atual} <: CARTAS_VERDES or {carta, carta_atual} <: CARTAS_AMARELAS) & // cartas são iguais ou possuem mesma cor
             indice_jogador : NAT & indice_jogador <= NUMERO_JOGADORES & 
             {indice_jogador} <| JOGADORES = {jogador} // índice correponde a jogador
         THEN 
@@ -134,15 +134,14 @@ OPERATIONS
             carta : NAT & {carta} : ran({jogador}) & // jogador possui carta
             carta mod NM : PULAR & // carta é de pular
             (carta mod NM = carta_atual mod NM or 
-                {carta, carta_atual} <: CARTAS_VERMELHAS or {carta, carta_atual} <: CARTAS_VERDES or 
-                {carta, carta_atual} <: CARTAS_AMARELAS) & // cartas são iguais ou possuem mesma cor
+               {carta, carta_atual} <: CARTAS_AZUIS or {carta, carta_atual} <: CARTAS_VERMELHAS or 
+               {carta, carta_atual} <: CARTAS_VERDES or {carta, carta_atual} <: CARTAS_AMARELAS) & // cartas são iguais ou possuem mesma cor
             indice_jogador : NAT & indice_jogador <= NUMERO_JOGADORES & 
             {indice_jogador} <| JOGADORES = {jogador} // índice correponde a jogador
         THEN 
             carta_atual := carta ||
             MONTE := MONTE - {carta} ||
             MESA := MESA \/ {carta} ||
-            JOGADORES := JOGADORES || 
             jogador_atual:(jogador_atual : JOGADORES & {(indice_jogador+2) mod NUMERO_JOGADORES} <| JOGADORES = {jogador}) // aumenta índice em duas unidades
         END;    
         
@@ -152,19 +151,35 @@ OPERATIONS
             carta : NAT & {carta} : ran({jogador}) & // jogador possui carta
             carta mod NM : COMPRAR_DUAS & // carta é de comprar duas
             (carta mod NM = carta_atual mod NM or 
-                {carta, carta_atual} <: CARTAS_VERMELHAS or {carta, carta_atual} <: CARTAS_VERDES or 
-                {carta, carta_atual} <: CARTAS_AMARELAS) & // cartas são iguais ou possuem mesma cor
+               {carta, carta_atual} <: CARTAS_AZUIS or {carta, carta_atual} <: CARTAS_VERMELHAS or 
+               {carta, carta_atual} <: CARTAS_VERDES or {carta, carta_atual} <: CARTAS_AMARELAS) & // cartas são iguais ou possuem mesma cor
             indice_jogador : NAT & indice_jogador <= NUMERO_JOGADORES & 
             {indice_jogador} <| JOGADORES = {jogador} // índice correponde a jogador
         THEN 
             carta_atual := carta ||
             MONTE := MONTE - {carta} ||
             MESA := MESA \/ {carta} ||
-            JOGADORES := JOGADORES || 
             jogador_atual:(jogador_atual : JOGADORES & {(indice_jogador+1) mod NUMERO_JOGADORES} <| JOGADORES = {jogador}) ||
             estado_atual := COMPRAR || // muda ou mantém o estado em COMPRAR
             acumulo_comprar := acumulo_comprar + 2 // aumenta o acumulo de compra em 2
         END;            
         
 	
+	    
+    jogarMudarCor(jogador, indice_jogador, carta) = 
+        PRE (estado_atual = MEIO) &
+            jogador = jogador_atual & 
+            carta : NAT & {carta} : ran({jogador}) & // jogador possui carta
+            carta mod NM : MUDAR_COR & // carta é coringa que muda cor
+            indice_jogador : NAT & indice_jogador <= NUMERO_JOGADORES & 
+            {indice_jogador} <| JOGADORES = {jogador} // índice correponde a jogador
+        THEN 
+            carta_atual := carta ||
+            MONTE := MONTE - {carta} ||
+            MESA := MESA \/ {carta} ||
+            CHOICE CARTAS_AZUIS := CARTAS_AZUIS \/ {carta} OR CARTAS_VERMELHAS := CARTAS_VERMELHAS \/ {carta} OR 
+                CARTAS_VERDES := CARTAS_VERDES \/ {carta} OR CARTAS_AMARELAS := CARTAS_AMARELAS \/ {carta}
+            END || //ds
+            jogador_atual:(jogador_atual : JOGADORES & {(indice_jogador+1) mod NUMERO_JOGADORES} <| JOGADORES = {jogador})
+        END;	    
 END
