@@ -50,7 +50,7 @@ INVARIANT
     MONTE <: NAT &
     JOGADORES : seq(POW(NAT)) &
     card(JOGADORES) = NUMERO_JOGADORES &
-    jogador_atual : ran(JOGADORES) &
+    estado_atual /= INICIO => jogador_atual : ran(JOGADORES) &
     carta_atual : NAT &
     estado_atual : ESTADO_JOGO &
     estado_atual /= INICIO => (size(JOGADORES) >= 2 or size(JOGADORES) <= 10) &
@@ -68,9 +68,9 @@ INITIALISATION
     MESA := {} ||
     MONTE := 0..9 \/ 10..12 \/ 22..30 \/ 31..33 \/ 42..51 \/ 52..54 \/ 64..72 \/ 73..75 \/ 84..93 \/ 94..96 \/ 106..114 \/ 115..117 \/ 126..135 \/ 136..138 \/ 148..156 \/ 157..159 ||
    JOGADORES := {} ||
-   jogador_atual::{} ||
+   jogador_atual := {} ||
    estado_atual := INICIO ||
-   carta_atual::{} ||
+   carta_atual := 0 ||
    acumulo_comprar := 0
     
 
@@ -79,22 +79,21 @@ OPERATIONS
     distribuirCartas(jogador, indice_jogador, cartas) =
         PRE estado_atual = INICIO & 
             indice_jogador : dom(JOGADORES) &
-            jogador : JOGADORES & {indice_jogador} <| JOGADORES = {jogador} &
+            jogador : JOGADORES & 
+            ({indice_jogador} <| JOGADORES) = {jogador} &
             JOGADORES(indice_jogador) = {} &
             cartas <: MONTE & card(cartas) = 7
         THEN 
-            //SELECT jogador_atual = JOGADORES(indice_jogador) THEN
-            //    jogador_atual := cartas
-            //END ||
+            jogador_atual := cartas || //define o jogador passado como o jogador atual
             JOGADORES := JOGADORES <+ {indice_jogador |-> cartas} ||
             MONTE := MONTE - cartas
         END;
     
-    adicionarJogador(jogador) =
+    adicionarJogador =
         PRE estado_atual = INICIO &
-            card(JOGADORES) < 10
+            card(JOGADORES) < 10 
         THEN
-            JOGADORES := JOGADORES \/ {jogador}
+            JOGADORES := JOGADORES <- {}
         END;
 
     comecarJogo =
