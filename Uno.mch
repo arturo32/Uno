@@ -53,8 +53,7 @@ INVARIANT
     jogador_atual : ran(JOGADORES) &
     carta_atual : NAT &
     estado_atual : ESTADO_JOGO &
-    size(JOGADORES) >= 2 &
-    size(JOGADORES) <= 10 &
+    estado_atual /= INICIO => (size(JOGADORES) >= 2 or size(JOGADORES) <= 10) &
     acumulo_comprar : NAT
 
     
@@ -67,9 +66,9 @@ INITIALISATION
     CARTAS_MUDAR_COR := 13..16 ||
     CARTAS_COMPRAR_QUATRO := 17..20 ||
     MESA := {} ||
-    MONTE := CARTAS_AZUIS \/ CARTAS_VERMELHAS \/ CARTAS_VERDES \/ CARTAS_AMARELAS \/ CARTAS_MUDAR_COR  \/ CARTAS_COMPRAR_QUATRO ||
-   JOGADORES::{} ||
-   jogador_atual::ran(JOGADORES) ||
+    MONTE := 0..9 \/ 10..12 \/ 22..30 \/ 31..33 \/ 42..51 \/ 52..54 \/ 64..72 \/ 73..75 \/ 84..93 \/ 94..96 \/ 106..114 \/ 115..117 \/ 126..135 \/ 136..138 \/ 148..156 \/ 157..159 ||
+   JOGADORES := {} ||
+   jogador_atual::{} ||
    estado_atual := INICIO ||
    carta_atual::{} ||
    acumulo_comprar := 0
@@ -84,15 +83,25 @@ OPERATIONS
             JOGADORES(indice_jogador) = {} &
             cartas <: MONTE & card(cartas) = 7
         THEN 
-            SELECT jogador_atual = JOGADORES(indice_jogador) THEN
-                jogador_atual := cartas
-            END ||
+            //SELECT jogador_atual = JOGADORES(indice_jogador) THEN
+            //    jogador_atual := cartas
+            //END ||
             JOGADORES := JOGADORES <+ {indice_jogador |-> cartas} ||
             MONTE := MONTE - cartas
         END;
-        
+    
+    adicionarJogador(jogador) =
+        PRE estado_atual = INICIO &
+            card(JOGADORES) < 10
+        THEN
+            JOGADORES := JOGADORES \/ {jogador}
+        END;
+
     comecarJogo =
-        PRE estado_atual = INICIO & {} /: ran(JOGADORES)
+        PRE estado_atual = INICIO & {} /: ran(JOGADORES) &
+        !jg.(jg : ran(JOGADORES) => card(jg) = 7) &
+        card(JOGADORES) >= 2 &
+        card(JOGADORES) <= 10
         THEN 
             estado_atual := MEIO
         END;
