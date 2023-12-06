@@ -96,19 +96,24 @@ OPERATIONS
             JOGADORES := JOGADORES <- {}
         END;
 
-    comecarJogo =
+    comecarJogo(primeiraCarta) =
         PRE estado_atual = INICIO & {} /: ran(JOGADORES) &
         !jg.(jg : ran(JOGADORES) => card(jg) = 7) &
         card(JOGADORES) >= 2 &
-        card(JOGADORES) <= 10
+        card(JOGADORES) <= 10 &
+        primeiraCarta : MONTE
         THEN 
-            estado_atual := MEIO
+            estado_atual := MEIO ||
+            carta_atual := primeiraCarta ||
+            MONTE := MONTE - {primeiraCarta} ||
+            MESA := MESA \/ {primeiraCarta}
         END;
 
+    //por que operação não é chamada?
     jogarNumero(carta) = 
         PRE estado_atual = MEIO &
             card(jogador_atual) > 0 &
-            carta : NAT & carta : jogador_atual & // jogador possui carta
+            carta : NAT & carta : jogador_atual // jogador possui carta
             carta_atual mod NM : NUMERO & carta mod NM : NUMERO & // cartas são números
             (carta mod NM = carta_atual mod NM or 
                {carta, carta_atual} <: CARTAS_AZUIS or {carta, carta_atual} <: CARTAS_VERMELHAS or 
