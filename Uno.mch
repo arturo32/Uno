@@ -123,7 +123,7 @@ OPERATIONS
                 carta_atual := carta ||
                 LET NOVO_JOGADORES BE NOVO_JOGADORES = JOGADORES <+ {JOGADORES~(jogador_atual) |-> jogador_atual - {carta}} IN
                     JOGADORES := NOVO_JOGADORES || // remove carta da mão do jogador
-                    jogador_atual := NOVO_JOGADORES((JOGADORES~(jogador_atual)+1) mod size(JOGADORES))
+                    jogador_atual := NOVO_JOGADORES(((JOGADORES~(jogador_atual)+1) mod size(JOGADORES)) + 1)
                 END ||
                 MESA := MESA \/ {carta}
                 END
@@ -146,7 +146,7 @@ OPERATIONS
                 MESA := MESA \/ {carta} ||
                 LET NOVO_JOGADORES BE  NOVO_JOGADORES = rev(JOGADORES <+ {JOGADORES~(jogador_atual) |-> jogador_atual - {carta}}) IN 
                     JOGADORES := NOVO_JOGADORES || // remove carta da mão do jogador e inverte ordem
-                    jogador_atual := NOVO_JOGADORES((JOGADORES~(jogador_atual)+1) mod size(JOGADORES))
+                    jogador_atual := NOVO_JOGADORES(((JOGADORES~(jogador_atual)+1) mod size(JOGADORES)) + 1)
                 END 
             END            
         END;    
@@ -165,7 +165,7 @@ OPERATIONS
                 carta_atual := carta ||
                 LET NOVO_JOGADORES BE  NOVO_JOGADORES = JOGADORES <+ {JOGADORES~(jogador_atual) |-> jogador_atual - {carta}} IN 
                     JOGADORES := NOVO_JOGADORES || // remove carta da mão do jogador
-                    jogador_atual := NOVO_JOGADORES((JOGADORES~(jogador_atual)+2) mod size(JOGADORES)) // aumenta índice em duas unidades
+                    jogador_atual := NOVO_JOGADORES(((JOGADORES~(jogador_atual)+2) mod size(JOGADORES)) + 1) // aumenta índice em duas unidades
                 END ||
                 MESA := MESA \/ {carta} 
             END            
@@ -186,7 +186,7 @@ OPERATIONS
                 carta_atual := carta ||
                 LET NOVO_JOGADORES BE  NOVO_JOGADORES = JOGADORES <+ {JOGADORES~(jogador_atual) |-> jogador_atual - {carta}} IN 
                     JOGADORES := NOVO_JOGADORES || // remove carta da mão do jogador
-                    jogador_atual := NOVO_JOGADORES((JOGADORES~(jogador_atual)+1) mod size(JOGADORES))
+                    jogador_atual := NOVO_JOGADORES(((JOGADORES~(jogador_atual)+1) mod size(JOGADORES)) + 1)
                 END ||            
                 MESA := MESA \/ {carta} ||
                 estado_atual := COMPRAR || // muda ou mantém o estado em COMPRAR
@@ -204,7 +204,7 @@ OPERATIONS
             carta_atual := carta ||
             LET NOVO_JOGADORES BE  NOVO_JOGADORES = JOGADORES <+ {JOGADORES~(jogador_atual) |-> jogador_atual - {carta}} IN 
                 JOGADORES := NOVO_JOGADORES || // remove carta da mão do jogador
-                jogador_atual := NOVO_JOGADORES((JOGADORES~(jogador_atual)+1) mod size(JOGADORES))
+                jogador_atual := NOVO_JOGADORES(((JOGADORES~(jogador_atual)+1) mod size(JOGADORES)) + 1)
             END ||
             MESA := MESA \/ {carta} ||
             CHOICE CARTAS_AZUIS := CARTAS_AZUIS \/ {carta_atual} OR CARTAS_VERMELHAS := CARTAS_VERMELHAS \/ {carta_atual} OR 
@@ -224,7 +224,7 @@ OPERATIONS
             carta_atual := carta ||
             LET NOVO_JOGADORES BE  NOVO_JOGADORES = JOGADORES <+ {JOGADORES~(jogador_atual) |-> jogador_atual - {carta}} IN 
                 JOGADORES := NOVO_JOGADORES || // remove carta da mão do jogador
-                jogador_atual := NOVO_JOGADORES((JOGADORES~(jogador_atual)+1) mod size(JOGADORES))
+                jogador_atual := NOVO_JOGADORES(((JOGADORES~(jogador_atual)+1) mod size(JOGADORES)) +1)
             END ||
             MESA := MESA \/ {carta} ||
             CHOICE CARTAS_AZUIS := CARTAS_AZUIS \/ {carta} OR CARTAS_VERMELHAS := CARTAS_VERMELHAS \/ {carta} OR 
@@ -241,7 +241,7 @@ OPERATIONS
             MONTE := MONTE - cartas ||
             LET NOVO_JOGADORES BE  NOVO_JOGADORES = JOGADORES <+ {JOGADORES~(jogador_atual) |-> (jogador_atual \/ cartas)} IN 
                 JOGADORES := NOVO_JOGADORES ||  // adiciona cartas a mão do jogador
-                jogador_atual := NOVO_JOGADORES((JOGADORES~(jogador_atual)+1) mod size(JOGADORES))
+                jogador_atual := NOVO_JOGADORES(((JOGADORES~(jogador_atual)+1) mod size(JOGADORES)) + 1)
             END ||
             estado_atual := MEIO || // muda o estado atual para MEIO
             acumulo_comprar := 0
@@ -259,7 +259,7 @@ OPERATIONS
             MONTE := MONTE - {carta} ||
              LET NOVO_JOGADORES BE  NOVO_JOGADORES = JOGADORES <+ {JOGADORES~(jogador_atual) |-> (jogador_atual \/ {carta})} IN 
                 JOGADORES := NOVO_JOGADORES ||  // adiciona carta a mão do jogador
-                jogador_atual := NOVO_JOGADORES((JOGADORES~(jogador_atual)+1) mod size(JOGADORES))
+                jogador_atual := NOVO_JOGADORES(((JOGADORES~(jogador_atual)+1) mod size(JOGADORES)) + 1)
             END
         END;   
         
