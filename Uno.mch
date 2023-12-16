@@ -20,7 +20,7 @@ PROPERTIES
     INVERTER = {12} &
     MUDAR_COR = 13..16 &
     COMPRAR_QUATRO = 17..20 &
-    NM = 21 // número mágico: para ser usado em relações de congruência &
+    NM = 21 // número mágico: para ser usado em relações de congruência
     
     
     
@@ -74,18 +74,19 @@ INITIALISATION
 
     
 OPERATIONS 
-    distribuirCartas(jogador, indice_jogador, cartas) =
+        
+    distribuirCartas(jogador, indice_jogador, carta) =
         PRE estado_atual = INICIO & 
-            indice_jogador : dom(JOGADORES) &
             jogador : JOGADORES & 
+            indice_jogador : dom(JOGADORES) &
+            carta : NAT & carta : MONTE &
             ({indice_jogador} <| JOGADORES) = {jogador} &
-            JOGADORES(indice_jogador) = {} &
-            cartas <: MONTE & card(cartas) = 7
+            card(JOGADORES(indice_jogador)) < 7
         THEN 
-            jogador_atual := cartas || //define o jogador passado como o jogador atual
-            JOGADORES := JOGADORES <+ {indice_jogador |-> cartas} ||
-            MONTE := MONTE - cartas
-        END;
+            jogador_atual := JOGADORES(indice_jogador) \/ {carta} || //define o jogador passado como o jogador atual
+            JOGADORES := JOGADORES <+ {indice_jogador |-> (JOGADORES(indice_jogador) \/ {carta})} ||
+            MONTE := MONTE - {carta}
+        END;    
     
     adicionarJogador =
         PRE estado_atual = INICIO &
