@@ -38,21 +38,24 @@ VARIABLES
     
 
 INVARIANT
-    MESA : POW(NAT) &
-    MONTE : POW(NAT)  &
-    CARTAS_AMARELAS : POW(NAT) &
-    CARTAS_AZUIS : POW(NAT)&
-    CARTAS_VERMELHAS : POW(NAT) &
-    CARTAS_VERDES : POW(NAT) &
-    CARTAS_MUDAR_COR : POW(NAT) &
-    CARTAS_COMPRAR_QUATRO : POW(NAT) &
-    JOGADORES : seq(POW(NAT)) &
+    MESA : FIN(NAT) &
+    MONTE : FIN(NAT)  &
+    CARTAS_AMARELAS : FIN(NAT) &
+    CARTAS_AZUIS : FIN(NAT)&
+    CARTAS_VERMELHAS : FIN(NAT) &
+    CARTAS_VERDES : FIN(NAT) &
+    CARTAS_MUDAR_COR : FIN(NAT) &
+    CARTAS_COMPRAR_QUATRO : FIN(NAT) &
+    JOGADORES : iseq(FIN(NAT)) &
     carta_atual : NAT &
     estado_atual : ESTADO_JOGO &
-    jogador_atual : POW(NAT) &
+    jogador_atual : FIN(NAT) &
+    (estado_atual /= INICIO => (jogador_atual : ran(JOGADORES))) &
     (estado_atual /= INICIO => (card(JOGADORES) >= 2 or card(JOGADORES) <= 10)) &
     (estado_atual /= INICIO => jogador_atual : ran(JOGADORES)) &
-    acumulo_comprar : NAT
+    !jj.(jj : ran(JOGADORES) => jj /\ MONTE = {}) &
+    acumulo_comprar : NAT 
+    
 
     
     
@@ -75,26 +78,17 @@ INITIALISATION
     
 OPERATIONS 
         
-    distribuirCartas(jogador, indice_jogador, carta) =
+    adicionarJogador =
         PRE estado_atual = INICIO & 
-            jogador : JOGADORES & 
-            indice_jogador : dom(JOGADORES) &
-            carta : NAT & carta : MONTE &
-            ({indice_jogador} <| JOGADORES) = {jogador} &
-            card(JOGADORES(indice_jogador)) < 7
+            size(JOGADORES) < 10
         THEN 
-            jogador_atual := JOGADORES(indice_jogador) \/ {carta} || //define o jogador passado como o jogador atual
-            JOGADORES := JOGADORES <+ {indice_jogador |-> (JOGADORES(indice_jogador) \/ {carta})} ||
-            MONTE := MONTE - {carta}
+            ANY cartas WHERE cartas : FIN(NAT) & cartas <: MONTE & card(cartas) = 7 THEN
+                JOGADORES := JOGADORES <- cartas ||
+                MONTE := MONTE - cartas ||
+                jogador_atual := cartas //define o jogador passado como o jogador atual
+            END                        
         END;    
     
-    adicionarJogador =
-        PRE estado_atual = INICIO &
-            size(JOGADORES) < 10 
-        THEN
-            JOGADORES := JOGADORES <- {}
-        END;
-
     comecarJogo(primeiraCarta) =
         PRE estado_atual = INICIO & {} /: ran(JOGADORES) &
         !jg.(jg : ran(JOGADORES) => card(jg) = 7) &
@@ -112,7 +106,6 @@ OPERATIONS
         PRE estado_atual = MEIO &
             carta : NAT & 
             carta mod NM : NUMERO &
-            card(jogador_atual) > 0 &
             carta : jogador_atual & // jogador possui carta
             ((carta mod NM = carta_atual mod NM) or 
                 ({carta, carta_atual} <: CARTAS_AZUIS) or 
@@ -125,10 +118,8 @@ OPERATIONS
                 estado_atual := FIM
             ELSE
                 carta_atual := carta ||
-                LET NOVO_JOGADORES BE NOVO_JOGADORES = JOGADORES <+ {JOGADORES~(jogador_atual) |-> jogador_atual - {carta}} IN
-                    JOGADORES := NOVO_JOGADORES || // remove carta da mão do jogador
-                    jogador_atual := NOVO_JOGADORES((JOGADORES~(jogador_atual) mod size(JOGADORES)) + 1)
-                END ||
+                JOGADORES := JOGADORES <+ {JOGADORES~(jogador_atual) |-> jogador_atual - {carta}} ||
+                jogador_atual := JOGADORES((JOGADORES~(jogador_atual) mod size(JOGADORES)) + 1) ||
                 MESA := MESA \/ {carta}
                 END
                 
