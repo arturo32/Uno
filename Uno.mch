@@ -110,9 +110,10 @@ OPERATIONS
 
     jogarNumero(carta) = 
         PRE estado_atual = MEIO &
+            carta : NAT & 
             carta mod NM : NUMERO &
             card(jogador_atual) > 0 &
-            carta : NAT & carta : jogador_atual & // jogador possui carta
+            carta : jogador_atual & // jogador possui carta
             ((carta mod NM = carta_atual mod NM) or 
                 ({carta, carta_atual} <: CARTAS_AZUIS) or 
                 ({carta, carta_atual} <: CARTAS_VERMELHAS) or 
@@ -278,6 +279,5 @@ OPERATIONS
             un := UNO
         END            
 END
-
 
 
