@@ -53,7 +53,6 @@ INVARIANT
     (estado_atual /= INICIO => (jogador_atual : ran(JOGADORES))) &
     (estado_atual /= INICIO => (card(JOGADORES) >= 2 or card(JOGADORES) <= 10)) &
     (estado_atual /= INICIO => jogador_atual : ran(JOGADORES)) &
-    !jj.(jj : ran(JOGADORES) => jj /\ MONTE = {}) &
     acumulo_comprar : NAT 
     
 
@@ -249,7 +248,7 @@ OPERATIONS
             !ca.(ca : jogador_atual => {ca, carta_atual} /<: CARTAS_AZUIS & 
                 {ca, carta_atual} /<: CARTAS_VERMELHAS & {ca, carta_atual} /<: CARTAS_VERDES & 
                 {ca, carta_atual} /<: CARTAS_AMARELAS & ca /: (MUDAR_COR \/ COMPRAR_QUATRO)) & // jogador não possui nenhuma carta que combine com a atual nem possui nenhum coringa
-            ((JOGADORES~(jogador_atual)+1) mod size(JOGADORES)) : dom(JOGADORES)
+            ((JOGADORES~(jogador_atual) mod size(JOGADORES)) + 1) : dom(JOGADORES)
         THEN 
             MONTE := MONTE - {carta} ||
              LET NOVO_JOGADORES BE  NOVO_JOGADORES = JOGADORES <+ {JOGADORES~(jogador_atual) |-> (jogador_atual \/ {carta})} IN 
@@ -268,7 +267,19 @@ OPERATIONS
             un : DIZER_UNO
         THEN
             un := UNO
-        END            
+        END;    
+        
+    reiniciarJogo =
+        PRE estado_atual = FIM 
+        THEN    
+            estado_atual := INICIO ||
+            jogador_atual := {}  ||
+            JOGADORES := {} ||
+            MESA := {} ||
+            MONTE := 0..9 \/ 10..12 \/ 22..30 \/ 31..33 \/ 42..51 \/ 52..54 \/ 64..72 \/ 73..75 \/ 84..93 \/ 94..96 \/ 106..114 \/ 115..117 \/ 126..135 \/ 136..138 \/ 148..156 \/ 157..159 ||
+            carta_atual := 0 ||
+            acumulo_comprar := 0
+        END        
 END
 
 
